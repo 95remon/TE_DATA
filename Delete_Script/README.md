@@ -1,6 +1,6 @@
 # Delete Script
 
-## using Python
+## Using Python
 
 ```python
     import os
