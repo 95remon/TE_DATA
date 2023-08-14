@@ -1,5 +1,10 @@
 # Delete Script
 
+### Question :
+You are working with a directory containing various files and folders. You need to create a Python script to delete specific files based on their patterns. The script should allow you to specify multiple patterns for the files you want to delete. If any processes for deleting files are already running, the script should wait for them to finish. Can you provide a Python script that achieves this task?
+
+### Answer :
+
 ## Using Python
 
 ```python
