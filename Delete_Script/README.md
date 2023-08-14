@@ -1,6 +1,61 @@
 # Delete Script
 
+## using Python
 
+```python
+    import os
+    import psutil
+    import fnmatch
+
+
+    # Set the directory path
+    directory_path = r'C:\path\to\your\directory'
+    files_to_delete_patterns = ["*.tmp", "*.log"]  # Change these patterns to match the files you want to delete
+
+    # Check if any deleting processes are still running
+    deleting_processes = [proc for proc in psutil.process_iter(attrs=['pid', 'cmdline'])
+                        if proc.info['cmdline'] and ' '.join(proc.info['cmdline']).find(f'Remove-Item -Path {directory_path}') != -1]
+
+    if deleting_processes:
+        print("There are other deleting processes still running. Please wait for them to finish.")
+    else:
+        # No other deleting processes are running, proceed with deletion
+        for root, dirs, files in os.walk(directory_path, topdown=False):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                for pattern in files_to_delete_patterns:
+                    if fnmatch.fnmatch(file_name, pattern):
+                        os.remove(file_path)
+                        print(f"Deleted file: {file_path}")
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                os.rmdir(dir_path)
+                print(f"Deleted folder: {dir_path}")
+        print("Files and folders deleted successfully.")
+
+```
+
+1. Set the ***directory_path variable*** to the path of the directory containing the files you want to process.
+
+2. Define the ***files_to_delete_patterns*** list to contain the patterns that match the files you want to delete. For example, if you want to delete both `.tmp` and `.log` files, set it as `["*.tmp", "*.log"]`.
+
+3. The script checks for other deleting processes, similar to the previous examples.
+
+4. Within the loop, it traverses through the directory and its subdirectories using the `os.walk()` function.
+
+5. For each file, the script checks whether the filename matches any of the patterns in the ***files_to_delete_patterns*** list using the fnmatch.`fnmatch()` function from the fnmatch module.
+
+6. If a matching pattern is found, the file is deleted using the `os.remove()` function, and a message is printed.
+
+7. For each directory, the script uses `os.rmdir()` to delete the directory.
+
+8. Messages are displayed indicating whether a folder or a file was deleted.
+
+9. The final message indicates that files and folders have been deleted successfully.
+
+***This Python script provides the same functionality as the previous examples but in a Python 3 environment.***
+
+---
 
 ## Using Bash
 
