@@ -18,7 +18,7 @@
 
     # Function to generate a new filename based on base name and sequence number
     function GenerateNewFilename($baseName, $sequenceNumber) {
-        $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+        $timestamp = Get-Date -Format "ddMMyyyyHHmmss"
         $newFilename = "${baseName}_${timestamp}_${sequenceNumber}$logFileExtension"
         return $newFilename
     }

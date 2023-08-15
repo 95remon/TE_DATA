@@ -1,27 +1,37 @@
 # Set the source folder path
 $sourceFolder = "C:\path\to\source\folder"
 
+
 # Set the destination folder path
 $destinationFolder = "C:\path\to\destination\folder"
+
 
 # Set the file extension of the log files
 $logFileExtension = ".log"
 
-# Initialize the sequence number
-$sequenceNumber = 1
+# Generate a random starting sequence number
+$sequenceNumber = Get-Random -Minimum 1 -Maximum 9999999
 
-# Function to generate a new filename based on base name and sequence number
+# Set the log.txt file path
+$logFilePath = "C:\path\to\log\folder\script_log.txt"
+
+
+# Function to generate a new filename based on base name, sequence number, date, and time
 function GenerateNewFilename($baseName, $sequenceNumber) {
-    $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+    $timestamp = Get-Date -Format "dd-MM-yyyy-HH-mm-ss"
     $newFilename = "${baseName}_${timestamp}_${sequenceNumber}$logFileExtension"
     return $newFilename
 }
 
 # Function to copy and rename log files
 function CopyAndRenameLogFiles {
+    $logContent = @()
+    
+    # Get the current date and time
+    $currentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    
     # Get all items (files and folders) in the source folder
     Get-ChildItem -Path $sourceFolder | ForEach-Object {
-        # Check if the item is a file and has the specified log file extension
         if ($_.Extension -eq $logFileExtension) {
             $sourcePath = $_.FullName
             $baseName = [System.IO.Path]::GetFileNameWithoutExtension($sourcePath)
@@ -30,12 +40,16 @@ function CopyAndRenameLogFiles {
             
             # Copy the file to the destination folder with the new name
             Copy-Item $sourcePath -Destination $destinationPath
-            Write-Host "Copied and renamed: $sourcePath -> $destinationPath"
+            $logEntry = "$currentDateTime - Copied and renamed: $sourcePath -> $destinationPath"
+            $logContent += $logEntry
             
             $sequenceNumber++
         }
     }
+    
+    # Write log content to the log file
+    $logContent | Out-File -FilePath $logFilePath -Append
 }
 
-# Call the function to perform the copying and renaming
+# Call the function to copy, rename log files, and log the script's behavior
 CopyAndRenameLogFiles
