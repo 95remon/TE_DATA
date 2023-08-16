@@ -54,6 +54,7 @@ if ($deletingProcesses.Count -gt 0) {
     Add-Content -Path $logFilePath -Value "$(Get-Date) - Files and folders deleted successfully."
 }
 
+
 ```
 
 1. Set the directory path, number of days ago, log file path, and file patterns.
@@ -75,6 +76,5 @@ if ($deletingProcesses.Count -gt 0) {
 9. Log each deleted item along with the current date and time.
 
 10. Output a completion message once all items are processed.
-
 
 ***This script combines pattern matching, date comparison, and logging to selectively delete files based on patterns and their last modification date, while maintaining a log for future reference.***

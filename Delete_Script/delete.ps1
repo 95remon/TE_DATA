@@ -1,4 +1,3 @@
-
 $directoryPath = "C:\path\to\your\directory" # Set the directory path
 
 $daysAgo = 30  # Set the number of days ago
