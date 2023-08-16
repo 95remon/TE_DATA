@@ -4,7 +4,7 @@
 
 ### CopyAndRename Script
 ```powershell
-        # Set the source folder path
+    # Set the source folder path
     $sourceFolder = "C:\path\to\source\folder"
 
 
