@@ -1,14 +1,19 @@
 # Set the source folder path
-$sourceFolder = "C:\path\to\source\folder"
+$sourceFolder = "C:\Users\95rem\OneDrive\Desktop\WE\TE_DATA\Backup_Script\D"
 
-# Set the destination folder path (FTP folder)
-$destinationFolder = "C:\path\to\destination\folder"
+# Set the destination folder path
+$destinationFolder = "C:\Users\95rem\OneDrive\Desktop\WE\TE_DATA\Backup_Script\FTP"
 
-# Set the file extensions of the log files
-$logFileExtensions = @(".log", ".txt")  # Add or modify extensions as needed
+# Set the archive folder path
+$archiveFolder = "C:\Users\95rem\OneDrive\Desktop\WE\TE_DATA\Backup_Script\Arc"
 
 # Set the log file path
-$logFilePath = "C:\path\to\log\folder\script_log.txt"
+$logFilePath = "C:\Users\95rem\OneDrive\Desktop\WE\TE_DATA\Backup_Script\script_log.txt"
+
+
+# Copy files from source to destination folder
+Copy-Item -Path "$sourceFolder\*" -Destination $destinationFolder -Recurse -Force
+
 
 # Function to create the archive folder for a given path
 function CreateArchiveFolder($archivePath) {
@@ -20,29 +25,28 @@ function CreateArchiveFolder($archivePath) {
 }
 
 # Function to archive and compress log files
-function ArchiveAndCompressLogFiles {
-    # Get all log files in the source folder and its subfolders
-    Get-ChildItem -Path $sourceFolder -Recurse | Where-Object {
-        $logFileExtensions -contains $_.Extension -and $_.PSIsContainer -eq $false
+function ArchiveAndCompressFiles {
+    # Get all files in the destination folder
+    Get-ChildItem -Path $destinationFolder | Where-Object {
+        $_.PSIsContainer -eq $false
     } | ForEach-Object {
-        $logFileName = $_.Name
-        $sourcePath = $_.FullName
-        $relativePath = $sourcePath.Substring($sourceFolder.Length)
-        $destinationPath = Join-Path -Path $destinationFolder -ChildPath $relativePath
+        $fileName = $_.Name
+        $filePath = $_.FullName
+        $archiveFileName = [System.IO.Path]::ChangeExtension($fileName, "zip")
+        $archiveFilePath = Join-Path -Path $archiveFolder -ChildPath $archiveFileName
 
-        # Check if the log file exists in both source and destination folders
-        if ((Test-Path -Path $sourcePath) -and (Test-Path -Path $destinationPath)) {
-            $compressedFileName = [System.IO.Path]::ChangeExtension($logFileName, "zip")
-            $compressedFilePath = Join-Path -Path $destinationPath -ChildPath $compressedFileName
-            CreateArchiveFolder $compressedFilePath
-            Compress-Archive -Path $sourcePath -DestinationPath $compressedFilePath -Force
-            Write-Host "Archived and compressed: $sourcePath -> $compressedFilePath"
+        # Check if the file exists in both source and destination folders
+        $sourceFilePath = Join-Path -Path $sourceFolder -ChildPath $fileName
+        if ((Test-Path -Path $filePath) -and (Test-Path -Path $sourceFilePath)) {
+            CreateArchiveFolder $archiveFilePath
+            Compress-Archive -Path $filePath -DestinationPath $archiveFilePath -Force
+            Write-Host "Archived and compressed: $filePath -> $archiveFilePath"
         }
     }
 }
 
-# Call the function to perform the archiving and compression for each log file
-ArchiveAndCompressLogFiles
+# Call the function to perform the archiving and compression for each file
+ArchiveAndCompressFiles
 
 # Write log content to the log file
 $scriptLogContent = "Script executed on: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
@@ -50,4 +54,4 @@ $scriptLogContent += "`r`n"
 $scriptLogContent += "-------------------"
 $scriptLogContent += "`r`n"
 $scriptLogContent += Get-Content -Path $logFilePath
-$scriptLogContent | Out-File -FilePath $logFilePath -Force
+$scriptLogContent | Out-File -FilePath $logFilePath -Append -Force
