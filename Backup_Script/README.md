@@ -85,8 +85,8 @@ CopyAndRenameLogFiles
 # Set the source folder path
 $sourceFolder = "C:\path\to\source\folder"
 
-# Set the archive folder path
-$archiveFolder = "C:\path\to\archive\folder"
+# Set the destination folder path (FTP folder)
+$destinationFolder = "C:\path\to\destination\folder"
 
 # Set the file extensions of the log files
 $logFileExtensions = @(".log", ".txt")  # Add or modify extensions as needed
@@ -109,14 +109,19 @@ function ArchiveAndCompressLogFiles {
     Get-ChildItem -Path $sourceFolder -Recurse | Where-Object {
         $logFileExtensions -contains $_.Extension -and $_.PSIsContainer -eq $false
     } | ForEach-Object {
+        $logFileName = $_.Name
         $sourcePath = $_.FullName
         $relativePath = $sourcePath.Substring($sourceFolder.Length)
-        $archivePath = Join-Path -Path $archiveFolder -ChildPath $relativePath
-        $compressedFileName = [System.IO.Path]::ChangeExtension($_.Name, "zip")
-        $compressedFilePath = Join-Path -Path $archivePath -ChildPath $compressedFileName
-        CreateArchiveFolder $compressedFilePath
-        Compress-Archive -Path $sourcePath -DestinationPath $compressedFilePath -Force
-        Write-Host "Archived and compressed: $sourcePath -> $compressedFilePath"
+        $destinationPath = Join-Path -Path $destinationFolder -ChildPath $relativePath
+
+        # Check if the log file exists in both source and destination folders
+        if ((Test-Path -Path $sourcePath) -and (Test-Path -Path $destinationPath)) {
+            $compressedFileName = [System.IO.Path]::ChangeExtension($logFileName, "zip")
+            $compressedFilePath = Join-Path -Path $destinationPath -ChildPath $compressedFileName
+            CreateArchiveFolder $compressedFilePath
+            Compress-Archive -Path $sourcePath -DestinationPath $compressedFilePath -Force
+            Write-Host "Archived and compressed: $sourcePath -> $compressedFilePath"
+        }
     }
 }
 
