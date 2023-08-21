@@ -2,64 +2,61 @@
 
 ## Using Powershell
 
-### CopyAndRename Script
+### Copy And Rename Script
+
 ```powershell
-    # Set the source folder path
-    $sourceFolder = "C:\path\to\source\folder"
+# Set the source folder path
+$sourceFolder = "C:\path\to\source\folder"
 
+# Set the destination folder path
+$destinationFolder = "C:\path\to\destination\folder"
 
-    # Set the destination folder path
-    $destinationFolder = "C:\path\to\destination\folder"
+# Set the file extensions of the log files
+$logFileExtensions = @(".log", ".txt")  # Add or modify extensions as needed
 
+# Generate a random starting sequence number
+$sequenceNumber = Get-Random -Minimum 10000 -Maximum 99999
 
-    # Set the file extension of the log files
-    $logFileExtension = ".log"
+# Set the log.txt file path
+$logFilePath = "C:\path\to\log\folder\script_log.txt"
 
-    # Generate a random starting sequence number
-    $sequenceNumber = Get-Random -Minimum 1 -Maximum 9999999
+# Function to generate a new filename based on base name, sequence number, date, and time
+function GenerateNewFilename($baseName, $sequenceNumber) {
+    $timestamp = Get-Date -Format "dd-MM-yyyy-HH-mm-ss"
+    $newFilename = "${baseName}_${timestamp}_${sequenceNumber}$logFileExtension"
+    return $newFilename
+}
 
-    # Set the log.txt file path
-    $logFilePath = "C:\path\to\log\folder\script_log.txt"
+# Function to copy and rename log files
+function CopyAndRenameLogFiles {
+    $logContent = @()
 
+    # Get the current date and time
+    $currentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-    # Function to generate a new filename based on base name, sequence number, date, and time
-    function GenerateNewFilename($baseName, $sequenceNumber) {
-        $timestamp = Get-Date -Format "dd-MM-yyyy-HH-mm-ss"
-        $newFilename = "${baseName}_${timestamp}_${sequenceNumber}$logFileExtension"
-        return $newFilename
-    }
+    # Get all items (files and folders) in the source folder
+    Get-ChildItem -Path $sourceFolder | ForEach-Object {
+        if ($logFileExtensions -contains $_.Extension) {
+            $sourcePath = $_.FullName
+            $baseName = [System.IO.Path]::GetFileNameWithoutExtension($sourcePath)
+            $newFilename = GenerateNewFilename $baseName $sequenceNumber
+            $destinationPath = Join-Path -Path $destinationFolder -ChildPath $newFilename
 
-    # Function to copy and rename log files
-    function CopyAndRenameLogFiles {
-        $logContent = @()
-        
-        # Get the current date and time
-        $currentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        
-        # Get all items (files and folders) in the source folder
-        Get-ChildItem -Path $sourceFolder | ForEach-Object {
-            if ($_.Extension -eq $logFileExtension) {
-                $sourcePath = $_.FullName
-                $baseName = [System.IO.Path]::GetFileNameWithoutExtension($sourcePath)
-                $newFilename = GenerateNewFilename $baseName $sequenceNumber
-                $destinationPath = Join-Path -Path $destinationFolder -ChildPath $newFilename
-                
-                # Copy the file to the destination folder with the new name
-                Copy-Item $sourcePath -Destination $destinationPath
-                $logEntry = "$currentDateTime - Copied and renamed: $sourcePath -> $destinationPath"
-                $logContent += $logEntry
-                
-                $sequenceNumber++
-            }
+            # Copy the file to the destination folder with the new name
+            Copy-Item $sourcePath -Destination $destinationPath
+            $logEntry = "$currentDateTime - Copied and renamed: $sourcePath -> $destinationPath"
+            $logContent += $logEntry
+
+            $sequenceNumber++
         }
-        
-        # Write log content to the log file
-        $logContent | Out-File -FilePath $logFilePath -Append
     }
 
-    # Call the function to copy, rename log files, and log the script's behavior
-    CopyAndRenameLogFiles
+    # Write log content to the log file
+    $logContent | Out-File -FilePath $logFilePath -Append
+}
 
+# Call the function to copy, rename log files, and log the script's behavior
+CopyAndRenameLogFiles
 
 ```
 
@@ -85,42 +82,42 @@
 ### Archive Script
 
 ```powershell
-    # Set the source folder path
-    $sourceFolder = "C:\path\to\source\folder"
+# Set the source folder path
+$sourceFolder = "C:\path\to\source\folder"
 
-    # Set the archive folder path
-    $archiveFolder = "C:\path\to\archive\folder"
+# Set the archive folder path
+$archiveFolder = "C:\path\to\archive\folder"
 
-    # Set the file extension of the log files
-    $logFileExtension = ".log"
+# Set the file extension of the log files
+$logFileExtension = ".log"
 
-    # Function to create the archive folder for a given path
-    function CreateArchiveFolder($archivePath) {
-        $archiveFolder = [System.IO.Path]::GetDirectoryName($archivePath)
-        if (-not (Test-Path -Path $archiveFolder)) {
-            New-Item -Path $archiveFolder -ItemType Directory -Force
-        }
+# Function to create the archive folder for a given path
+function CreateArchiveFolder($archivePath) {
+    $archiveFolder = [System.IO.Path]::GetDirectoryName($archivePath)
+    if (-not (Test-Path -Path $archiveFolder)) {
+        New-Item -Path $archiveFolder -ItemType Directory -Force
     }
+}
 
-    # Function to archive and compress each log file
-    function ArchiveAndCompressLogFiles {
-        # Get all log files in the source folder and its subfolders
-        Get-ChildItem -Path $sourceFolder -Recurse | Where-Object {
-            $_.Extension -eq $logFileExtension -and $_.PSIsContainer -eq $false
-        } | ForEach-Object {
-            $sourcePath = $_.FullName
-            $relativePath = $sourcePath.Substring($sourceFolder.Length)
-            $archivePath = Join-Path -Path $archiveFolder -ChildPath $relativePath
-            $compressedFileName = [System.IO.Path]::ChangeExtension($_.Name, "zip")
-            $compressedFilePath = Join-Path -Path $archivePath -ChildPath $compressedFileName
-            CreateArchiveFolder $compressedFilePath
-            Compress-Archive -Path $sourcePath -DestinationPath $compressedFilePath -Force
-            Write-Host "Archived and compressed: $sourcePath -> $compressedFilePath"
-        }
+# Function to archive and compress each log file
+function ArchiveAndCompressLogFiles {
+    # Get all log files in the source folder and its subfolders
+    Get-ChildItem -Path $sourceFolder -Recurse | Where-Object {
+        $_.Extension -eq $logFileExtension -and $_.PSIsContainer -eq $false
+    } | ForEach-Object {
+        $sourcePath = $_.FullName
+        $relativePath = $sourcePath.Substring($sourceFolder.Length)
+        $archivePath = Join-Path -Path $archiveFolder -ChildPath $relativePath
+        $compressedFileName = [System.IO.Path]::ChangeExtension($_.Name, "zip")
+        $compressedFilePath = Join-Path -Path $archivePath -ChildPath $compressedFileName
+        CreateArchiveFolder $compressedFilePath
+        Compress-Archive -Path $sourcePath -DestinationPath $compressedFilePath -Force
+        Write-Host "Archived and compressed: $sourcePath -> $compressedFilePath"
     }
+}
 
-    # Call the function to perform the archiving and compression for each log file
-    ArchiveAndCompressLogFiles
+# Call the function to perform the archiving and compression for each log file
+ArchiveAndCompressLogFiles
 
 ```
 

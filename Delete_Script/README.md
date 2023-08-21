@@ -57,6 +57,13 @@ if ($deletingProcesses.Count -gt 0) {
 
 ```
 
+Execute this command to run the script 
+
+```powershell
+Powershell.exe -executionpolicy remotesigned -File  ".\delete.ps1"
+```
+
+
 1. Set the directory path, number of days ago, log file path, and file patterns.
 
 2. Calculate the target date based on the specified number of days.
